@@ -1,0 +1,4 @@
+*.json
+*.md
+.prettierrc.js
+.eslintrc.js
