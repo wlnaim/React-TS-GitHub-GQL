@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useQuery } from 'urql';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation } from 'urql';
 
 import { RepositoryPreviewFragment } from '../generated/graphql';
 import { repositoryQueryOne } from '../graphql/respository';
-import { viewerRepositoryStarredQueryAll } from '../graphql/viewer';
+import { viewerRepositoryStarredQueryAll, viewerRepositoryQueryOne } from '../graphql/viewer';
 
 import { SharedBox } from './SharedBox';
-// import { SharedButton } from './SharedButton';
+import { SharedButton } from './SharedButton';
 import { RepositoryDetail } from './RepositoryDetail';
 import { RepositoryItem } from './RepositoryItem';
 import { SharedItemGrid } from './SharedItemGrid';
@@ -58,27 +58,52 @@ export const RouteRepos: React.FC = (): React.ReactElement => {
         variables: { name: '', owner: '' },
     });
 
-    const [listingsVariables /*, setListingsVariables*/] = useState({
+    const [listingsVariables, setListingsVariables] = useState({
         cursor: null,
-        first: 6,
+        first: 100,
     });
 
     const modalProps = useSharedModal();
 
-    const [listings] = useQuery({
+    let [listings, setListings] = useQuery({
         query: viewerRepositoryStarredQueryAll,
         variables: listingsVariables,
     });
 
-    // const handleFetchMore = (): void => {
-    //     if (!listings.fetching && listings.data) {
-    //         setListingsVariables(prevState => ({
-    //             ...prevState,
-    //             cursor:
-    //                 listings.data.viewer.starredRepositories.pageInfo.endCursor,
-    //         }));
-    //     }
-    // };
+    let [listingsAux, setListingsAux] = useQuery({
+        query: viewerRepositoryStarredQueryAll,
+        variables: listingsVariables,
+    });
+
+    const [res, filterData] = useMutation(
+        repositoryQueryOne,
+    );
+    const handleFetchMore = (): void => {
+        if (!listings.fetching && listings.data) {
+            setListingsVariables(prevState => ({
+                ...prevState,
+                cursor:
+                    listings.data.viewer.starredRepositories.pageInfo.endCursor,
+            }));
+        }
+    };
+    const filterResults = (): void => {
+        var inputValue = document.getElementById("search").value;
+        const mutationVars = {
+            name: inputValue,
+            owner: "",
+        };
+        filterData(mutationVars);
+        if (!listings.fetching && listings.data) {
+            listings = listingsAux;
+            listings.data.viewer.starredRepositories.edges = listingsAux.data.viewer.starredRepositories.edges.filter(x => x.node.name.toLowerCase().includes(inputValue));
+            setListings(listings);
+        }
+    };
+
+    const resetResults = (): void => {
+        window.location.reload(false); 
+    };
 
     const handleItemClick = ({
         name,
@@ -91,10 +116,10 @@ export const RouteRepos: React.FC = (): React.ReactElement => {
         modalProps.toggle();
     };
 
-    // const canFetchMore =
-    //     !listings.fetching &&
-    //     !!listings.data &&
-    //     listings.data.viewer.starredRepositories.pageInfo.hasNextPage;
+    const canFetchMore =
+        !listings.fetching &&
+        listings.data &&
+        listings.data.viewer.starredRepositories.pageInfo.hasNextPage;
 
     const hasListings =
         listings.data &&
@@ -110,8 +135,11 @@ export const RouteRepos: React.FC = (): React.ReactElement => {
                     />
                 }
             >
-                My Starred Repositories
+                My started repositories
             </SharedLayoutTitle>
+            <input name="search" id="search" type="text" placeholder="Search..." />
+            <button onClick={filterResults}>Search</button>
+            <button onClick={resetResults}>Reset</button>
             {!hasListings && (
                 <SharedBox display="flex" justifyContent="center" py="double">
                     {listings.fetching ? (
@@ -122,8 +150,7 @@ export const RouteRepos: React.FC = (): React.ReactElement => {
                 </SharedBox>
             )}
             <SharedItemGrid>
-                {hasListings &&
-                    listings.data.viewer.starredRepositories.edges.map(
+                {hasListings && listings.data.viewer.starredRepositories.edges.map(
                         ({
                             node,
                         }: {
@@ -146,14 +173,14 @@ export const RouteRepos: React.FC = (): React.ReactElement => {
                     listingConfig={listingConfig}
                 />
             </SharedItemGrid>
-            {/* <SharedBox display="flex" justifyContent="center" mt="double">
+            <SharedBox display="flex" justifyContent="center" mt="double">
                 <SharedButton
                     disabled={!canFetchMore}
                     onClick={handleFetchMore}
                 >
-                    Load more
+                    {!canFetchMore ? "No more repos" : "Load more"}
                 </SharedButton>
-            </SharedBox> */}
+            </SharedBox>
         </SharedWrapper>
     );
 };

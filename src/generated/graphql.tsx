@@ -20102,7 +20102,7 @@ export const RepositoryUpdateSubscriptionComponent = (props: Omit<Urql.MutationP
 );
 
 export const ViewerRepositoryAllDocument = gql`
-    query viewerRepositoryAll($cursor: String, $first: Int = 5, $orderByDirection: OrderDirection = ASC, $orderByField: RepositoryOrderField = NAME) {
+    query viewerRepositoryAll($cursor: String, $first: Int = 100, $orderByDirection: OrderDirection = ASC, $orderByField: RepositoryOrderField = NAME) {
   viewer {
     repositories(after: $cursor, first: $first, orderBy: {direction: $orderByDirection, field: $orderByField}) {
       edges {
@@ -20124,7 +20124,7 @@ export const ViewerRepositoryAllComponent = (props: Omit<Urql.QueryProps<ViewerR
 );
 
 export const ViewerRepositoryStarredAllDocument = gql`
-    query viewerRepositoryStarredAll($cursor: String, $first: Int = 5, $orderByDirection: OrderDirection = ASC, $orderByField: StarOrderField = STARRED_AT) {
+    query viewerRepositoryStarredAll($cursor: String, $first: Int = 100, $orderByDirection: OrderDirection = ASC, $orderByField: StarOrderField = STARRED_AT) {
   viewer {
     starredRepositories(after: $cursor, first: $first, orderBy: {direction: $orderByDirection, field: $orderByField}) {
       edges {

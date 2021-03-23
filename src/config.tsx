@@ -10,7 +10,7 @@ import { SharedEmoji } from './components/SharedEmoji';
 export const config = {
     repo: {
         name: packageJson.name,
-        url: packageJson.homepage,
+        url: packageJson.name,
     },
 };
 

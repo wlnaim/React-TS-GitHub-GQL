@@ -12,7 +12,7 @@ import {
 export const viewerRepositoryQueryAll = gql`
     query viewerRepositoryAll(
         $cursor: String
-        $first: Int = 5
+        $first: Int = 100
         $orderByDirection: OrderDirection = ASC
         $orderByField: RepositoryOrderField = NAME
     ) {
@@ -41,7 +41,7 @@ export const viewerRepositoryQueryAll = gql`
 export const viewerRepositoryStarredQueryAll = gql`
     query viewerRepositoryStarredAll(
         $cursor: String
-        $first: Int = 5
+        $first: Int = 100
         $orderByDirection: OrderDirection = ASC
         $orderByField: StarOrderField = STARRED_AT
     ) {
